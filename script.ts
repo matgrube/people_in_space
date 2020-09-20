@@ -1,3 +1,5 @@
+// import config = require('./config');
+
 function moduleMaker(type:string, moduleClass:string, id:string) {
     const result = document.createElement(type);
     result.classList.add(moduleClass);
@@ -12,11 +14,17 @@ async function getData () {
     return data;
 };
 
+async function getPhoto (key) {
+    let data: object = fetch(`https://api.nasa.gov/planetary/apod?api_key=${key}`)
+        .then(response => response.json())
+        .then(data => {return data});
+    return data;
+}
+
 (async function app() {
     let fetchedData: object = await getData();
-    console.log(fetchedData);
     let { people, number } = fetchedData;
-    console.log(people);
+
     let h3 = moduleMaker('h3', 'how_many', 'how_many');
     h3.innerText = `Number of people in space right now: ${fetchedData.number.toString()}`;
     let app = document.getElementById('app');
@@ -31,4 +39,21 @@ async function getData () {
         person.innerText = e.name;
         listOfPeople.appendChild(person);
     })
+
+    let header = moduleMaker('h3', 'photo_desc');
+    header.innerText = 'NASA Photo of the Day:';
+    app.appendChild(header);
+
+    // let key:string = config ? config.NASA_KEY : "DEMO_KEY";
+    let key:string = "DEMO_KEY";
+    let photoData: object = await getPhoto(key);
+    let { url, explanation } = photoData;
+
+    const photo = moduleMaker('img', 'space_photo');
+    photo.setAttribute('src', url);
+    app.appendChild(photo);
+
+    const desc = moduleMaker('p', 'photo_description');
+    desc.innerText = explanation;
+    app.appendChild(desc);
 }())
